@@ -59,9 +59,17 @@ public class CarRacer extends Application {
    
    /* Method to display another scene */
    public void updateScene(Parent root) {
+   
+      // Create new scene
       scene = new Scene(root, sceneWidth, sceneHeight);
+      
+      // Start listening to key events
       handleKeys();
+      
+      // Update scene
       stage.setScene(scene);
+      
+      // Show stage
       stage.show();
    }
    
