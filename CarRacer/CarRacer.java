@@ -133,7 +133,7 @@ public class CarRacer extends Application {
       return root;
    }
    
-   /* Start race */
+   /* Create race and add racer to it */
    public void initRace(String raceMap) {
       race = new Race(raceMap, sceneWidth, sceneHeight);
       race.setRacer(new Racer("Dinko"));
@@ -144,7 +144,7 @@ public class CarRacer extends Application {
       // Create racer
       Racer racer;
       
-      // If race does not exist then return
+      // If race does not exist then return from method
       try {
          racer = race.getRacer();
       } catch (NullPointerException e) {
