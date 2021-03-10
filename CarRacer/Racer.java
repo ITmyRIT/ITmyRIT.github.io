@@ -9,6 +9,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
+import javafx.scene.image.*;
 import javafx.stage.*;
 import javafx.geometry.*;
 import javafx.animation.*;
@@ -30,13 +31,17 @@ public class Racer extends ImageView {
    private final static double ROTATION_DEG = 0.6;
    private final static int TIMER_TICK_RATE = 3;
    
+   private Image racerImg = null;
+   private Image mapImg = null;
    private double positionX = 0;
    private double positionY = 0;
    private double speed = 0.0;
    private double maxSpeed = 2.0;
+   private double oldMaxSpeed = maxSpeed;
+   private double maxTurboSpeed = 8.0;
    private double rotation = 0;
-   private int carHeight = 20;
-   private int carWidth = 30;
+   private int carHeight = 40;
+   private int carWidth = 60;
    private String name;
    
    // Movement Timers
@@ -45,12 +50,14 @@ public class Racer extends ImageView {
    private TimerTask taskBackward;
    private TimerTask taskLeft;
    private TimerTask taskRight;
+   private TimerTask taskTurbo;
    
    // Old movement states
    private boolean goingForward = false;
    private boolean goingBackward = false;
    private boolean goingLeft = false;
    private boolean goingRight = false;
+   private boolean goingTurbo = false;
    
    public Racer(String name) {
       super(racerImage);
@@ -59,6 +66,19 @@ public class Racer extends ImageView {
       this.setPreserveRatio(true);
       this.name = name;
       this.simulateDrag();
+   }
+   
+   public Racer(String name, double startX, double startY, double startDeg) {
+      super(racerImage);
+      this.setFitWidth(carWidth);
+      this.setFitHeight(carHeight);
+      this.setPreserveRatio(true);
+      this.name = name;
+      this.positionX = startX;
+      this.positionY = startY;
+      this.rotation = startDeg;
+      this.simulateDrag();
+      
    }
    
    /* Movement */
@@ -139,6 +159,37 @@ public class Racer extends ImageView {
       }
    }
    
+   public void goTurbo(boolean go) {
+      if (taskTurbo!=null) {
+         taskTurbo.cancel();
+      }
+      if (go && !goingTurbo) {
+         taskTurbo = 
+            new TimerTask() {
+               @Override public void run() {
+                  synchronized(moveTimer) {
+                     maxSpeed+=ENGINE_FORCE;
+                  }
+               }
+            };
+         moveTimer.scheduleAtFixedRate(taskTurbo, 0, TIMER_TICK_RATE);
+         goingTurbo = true;
+      } else if (!go && goingTurbo){
+         taskTurbo.cancel();
+         taskTurbo = 
+            new TimerTask() {
+               @Override public void run() {
+                  synchronized(moveTimer) {
+                     if(maxSpeed>oldMaxSpeed) maxSpeed-=ENGINE_FORCE;
+                     else taskTurbo.cancel();
+                  }
+               }
+            };
+         moveTimer.scheduleAtFixedRate(taskTurbo, 0, TIMER_TICK_RATE);
+         goingTurbo=false;
+      }
+   }
+   
    // Drag
    public void simulateDrag(){
       moveTimer.scheduleAtFixedRate(
@@ -158,13 +209,39 @@ public class Racer extends ImageView {
          }, 0, TIMER_TICK_RATE);
    }
 
+   public String doDebug() {
+      return String.format(
+         "Position X: %.2f\n"+
+         "Position Y: %.2f\n"+
+         "Position Rotation: %.2f\n"+
+         "Speed: %.2f\n"+
+         "MaxSpeed: %.2f\n"+
+         "OldMax: %.2f\n"+
+         "MaxTurbo: %.2f\n",
+         this.positionX,
+         this.positionY,
+         this.rotation,
+         this.speed,
+         this.maxSpeed,
+         this.oldMaxSpeed,
+         this.maxTurboSpeed
+      );
+   }
+   
+   public double getMaxSpeed() {
+      return this.maxSpeed;
+   }
+   
    public void update() {
+      if (maxSpeed>maxTurboSpeed) maxSpeed = maxTurboSpeed;
+      if (-maxSpeed>maxTurboSpeed) maxSpeed = -maxTurboSpeed;
       if (speed>maxSpeed) speed = maxSpeed;
       if (-speed>maxSpeed) speed = -maxSpeed;
-      positionX+=Math.cos(Math.toRadians(rotation))*speed;
-      positionY+=Math.sin(Math.toRadians(rotation))*speed;
+      this.positionX+=Math.cos(Math.toRadians(rotation))*speed;
+      this.positionY+=Math.sin(Math.toRadians(rotation))*speed;
       this.setTranslateX(positionX);
       this.setTranslateY(positionY);
       this.setRotate(rotation);
+      System.out.println(doDebug());
    }
 }

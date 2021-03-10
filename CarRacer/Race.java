@@ -14,6 +14,7 @@ import javafx.geometry.*;
 import javafx.animation.*;
 import java.io.*;
 import java.util.*;
+import javafx.scene.image.*;
 
 /*
  * Final Project - Car Racer 
@@ -26,6 +27,7 @@ public class Race extends AnimationTimer {
 
    /* Image */
    private String roadImage;
+   private String roadMask;
    
    /* Size */
    private int roadWidth;
@@ -37,8 +39,9 @@ public class Race extends AnimationTimer {
    /* FPS */
    private Label fps;
    
-   public Race(String roadImage, int roadWidth, int roadHeight){
+   public Race(String roadImage, String roadMask, int roadWidth, int roadHeight){
       this.roadImage = roadImage;
+      this.roadMask = roadMask;
       this.roadWidth = roadWidth;
       this.roadHeight = roadHeight;
       this.fps = new Label();
@@ -55,15 +58,14 @@ public class Race extends AnimationTimer {
    public StackPane getMap(){
       // Create Panes
       StackPane root = new StackPane();
-      ImageView map = new ImageView(roadImage);
+      Image mapImg = new Image(roadImage, roadWidth, roadHeight, true, true);
+      Image maskImg = new Image(roadMask, roadWidth, roadHeight, true, true);
       
-      // Modify Size of Map
-      map.setFitWidth(roadWidth);
-      map.setFitHeight(roadHeight);
-      map.setPreserveRatio(true);
-      
+      ImageView map = new ImageView(mapImg);
+      ImageView mask = new ImageView(maskImg);
+
       // Append Map to root
-      root.getChildren().addAll(map, getRacerPane());      
+      root.getChildren().addAll(mask, map, getRacerPane());      
       
       // Return root
       return root;
@@ -83,8 +85,19 @@ public class Race extends AnimationTimer {
       return this.fps;
    }
    
+   public void checkBorder(Racer racer) {
+      
+   }
+   
+   public void setShowSpeed(double speed) {
+      this.fps.setText(String.format("MaxSpeed: %.4f", speed));
+   }
+   
    @Override public void handle(long timeStamp) {
       racer.update();
-      setFrame(timeStamp);
+      checkBorder(racer);
+      
+      //setFrame(timeStamp);
+      setShowSpeed(racer.getMaxSpeed());
    }
 }

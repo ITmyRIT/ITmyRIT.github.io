@@ -30,12 +30,21 @@ public class CarRacer extends Application {
    // Stage (window)
    private Stage stage;
    private Scene scene;
-   private int sceneWidth = 800;
-   private int sceneHeight = 400;
+   private int sceneWidth = 1000;
+   private int sceneHeight = 600;
 
    /* Race attributes */
    private Race race;
+   
+   /* Racer constants */
+   private final double RACER_START_X = -394;
+   private final double RACER_START_Y = 72;
+   private final double RACER_START_DEG = -110;
 
+   /* Map Constants */
+   private static final String RACE_MAP = "assets/road2.png";
+   private static final String RACE_MASK = "assets/road-mask.png";
+   
    /* Main method */
    public static void main(String[]args) {
       launch(args);
@@ -45,7 +54,7 @@ public class CarRacer extends Application {
    @Override public void start(Stage stage) {
       this.stage = stage;
       
-      stage.setResizable(false);
+      stage.setResizable(true);
       stage.setTitle("Car Racer");
       stage.setOnCloseRequest(
          new EventHandler<WindowEvent>() {
@@ -78,39 +87,49 @@ public class CarRacer extends Application {
       // Create new root pane
       VBox root = new VBox();
       
-      Button btnStart = new Button("Start");
+      Button btnSingleplayer = new Button("Singleplayer");
+      Button btnMultiplayer = new Button("Multiplayer");
       
-      btnStart.setPrefWidth(300);
-      btnStart.setOnAction(
+      btnSingleplayer.setPrefWidth(300);
+      btnMultiplayer.setPrefWidth(300);
+      
+      btnSingleplayer.setOnAction(
          new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-               updateScene(setupRace());
+               updateScene(setupSingleplayer());
+            }
+         });
+         
+      btnMultiplayer.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               updateScene(setupMultiplayer());
             }
          });
          
       root.setAlignment(Pos.CENTER);
-      root.getChildren().addAll(btnStart);
+      root.getChildren().addAll(btnSingleplayer, btnMultiplayer);
       
       // Return root
       return root;
    }
    
-   /* Create and return the Race GUI */
-   public Parent setupRace() {
+   /* Create and return the SinglePlayer Race GUI */
+   public Parent setupSingleplayer() {
       // Create new root pane
       VBox root = new VBox();
       root.setPadding(new Insets(10, 10, 10, 10));
       
       // Initialize Race
-      initRace("assets/road.png");
+      initRace();
       
       // Row 0
       HBox fpControls = new HBox();
       Pane paneSpacer = new Pane();
-      Button btnStop = new Button("Stop");
+      Button btnBack = new Button("Back");
       Label lblFPS = race.getFrame();
       
-      btnStop.setOnAction(
+      btnBack.setOnAction(
          new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                updateScene(setupMenu());
@@ -119,13 +138,13 @@ public class CarRacer extends Application {
          });
       
       fpControls.setHgrow(paneSpacer, Priority.ALWAYS);
-      fpControls.getChildren().addAll(btnStop, paneSpacer, lblFPS);
+      fpControls.getChildren().addAll(btnBack, paneSpacer, lblFPS);
       root.getChildren().add(fpControls);
    
       // Row 1
       Parent map = race.getMap();
       root.getChildren().add(map);
-      
+      root.setAlignment(Pos.CENTER);
       // Start race
       race.start();
       
@@ -133,10 +152,32 @@ public class CarRacer extends Application {
       return root;
    }
    
+   /* Create and return the MultiPlayer Race GUI */
+   public Parent setupMultiplayer() {
+      // Create new root pane
+      VBox root = new VBox();
+      
+      Button btnBack = new Button("Back");
+      
+      btnBack.setPrefWidth(300);
+      btnBack.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               updateScene(setupMenu());
+            }
+         });
+         
+      root.setAlignment(Pos.CENTER);
+      root.getChildren().addAll(btnBack);
+      
+      // Return root
+      return root;
+   }
+   
    /* Create race and add racer to it */
-   public void initRace(String raceMap) {
-      race = new Race(raceMap, sceneWidth, sceneHeight);
-      race.setRacer(new Racer("Dinko"));
+   public void initRace() {
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      race.setRacer(new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG));
    }
    
    /* Keyboard Handler */
@@ -152,46 +193,48 @@ public class CarRacer extends Application {
       }
       
       /* KEY PRESSED */
-      scene.addEventFilter(KeyEvent.KEY_PRESSED, key -> {
+      scene.addEventFilter(KeyEvent.KEY_PRESSED, 
+         key -> {
          
             switch (key.getCode()) {
-               case UP:
+               case UP: case W:
                   racer.goFoward(true);
                   break;
-               case DOWN:
+               case DOWN: case S:
                   racer.goBackward(true);
                   break;
-               case LEFT: 
+               case LEFT: case A:
                   racer.goLeft(true);
                   break;
-               case RIGHT:
+               case RIGHT: case D:
                   racer.goRight(true); 
                   break;
                case SHIFT:
-                     
+                  racer.goTurbo(true);
                   break;
             }
             
          });
              
       /* KEY RELEASED */
-      scene.addEventFilter(KeyEvent.KEY_RELEASED, key -> {
-      
+      scene.addEventFilter(KeyEvent.KEY_RELEASED, 
+         key -> {
+         
             switch (key.getCode()) {
-               case UP:
+               case UP: case W:
                   racer.goFoward(false);
                   break;
-               case DOWN: 
+               case DOWN: case S:
                   racer.goBackward(false);
                   break;
-               case LEFT: 
+               case LEFT: case A:
                   racer.goLeft(false);
                   break;
-               case RIGHT:
+               case RIGHT: case D:
                   racer.goRight(false);
                   break;
                case SHIFT: 
-                     
+                  racer.goTurbo(false);
                   break;
             }
          });
