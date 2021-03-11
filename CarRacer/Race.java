@@ -85,8 +85,9 @@ public class Race extends AnimationTimer {
       return this.fps;
    }
    
-   public void checkBorder(Racer racer) {
-      
+   public void checkCollison(Racer racer) {
+      boolean onMap = racer.isRacerAt((int)roadWidth/2, (int)roadHeight/2, roadWidth, roadHeight);
+      System.out.println(onMap);
    }
    
    public void setShowSpeed(double speed) {
@@ -99,7 +100,7 @@ public class Race extends AnimationTimer {
    
    @Override public void handle(long timeStamp) {
       racer.update();
-      checkBorder(racer);
+      checkCollison(racer);
       
       //setFrame(timeStamp);
       //setShowSpeed(racer.getMaxSpeed());

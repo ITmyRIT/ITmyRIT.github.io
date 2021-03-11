@@ -10,6 +10,7 @@ import javafx.scene.text.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
 import javafx.scene.image.*;
+import javafx.scene.paint.*;
 import javafx.stage.*;
 import javafx.geometry.*;
 import javafx.animation.*;
@@ -24,24 +25,23 @@ import java.lang.Math;
  * Represents individual Racer
  */
  
-public class Racer extends ImageView {
+public class Racer extends StackPane {
    private final static String racerImage = "assets/car.png";
-   private final static double DRAG_FORCE = 0.01;
-   private final static double ENGINE_FORCE = 0.02;
+   private final static String racerMask = "assets/car-mask.png";
+   private final static double DRAG_FORCE = 0.005;
+   private final static double ENGINE_FORCE = 0.05;
    private final static double ROTATION_DEG = 0.6;
-   private final static int TIMER_TICK_RATE = 3;
+   private final static int TIMER_TICK_RATE = 4;
    
-   private Image racerImg = null;
-   private Image mapImg = null;
    private double positionX = 0;
    private double positionY = 0;
    private double speed = 0.0;
    private double maxSpeed = 2.0;
    private double oldMaxSpeed = maxSpeed;
-   private double maxTurboSpeed = 8.0;
+   private double maxTurboSpeed = 4.0;
    private double rotation = 0;
-   private int carHeight = 40;
-   private int carWidth = 60;
+   private int racerHeight = 30;
+   private int racerWidth = 40;
    private String name;
    
    // Movement Timers
@@ -59,26 +59,38 @@ public class Racer extends ImageView {
    private boolean goingRight = false;
    private boolean goingTurbo = false;
    
+   // Images
+   private Image racerImg = null;
+   private Image maskImg = null;
+   
    public Racer(String name) {
-      super(racerImage);
-      this.setFitWidth(carWidth);
-      this.setFitHeight(carHeight);
-      this.setPreserveRatio(true);
+      racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
+      maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
+      
+      ImageView racer = new ImageView(racerImg);
+      ImageView mask = new ImageView(maskImg);
+      
+      this.getChildren().addAll(mask, racer);
       this.name = name;
       this.simulateDrag();
    }
    
    public Racer(String name, double startX, double startY, double startDeg) {
-      super(racerImage);
-      this.setFitWidth(carWidth);
-      this.setFitHeight(carHeight);
-      this.setPreserveRatio(true);
+      racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
+      maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
+      
+      ImageView racer = new ImageView(racerImg);
+      ImageView mask = new ImageView(maskImg);
+      
+      this.getChildren().addAll(mask, racer);
+      this.name = name;
+      this.simulateDrag();
+      
       this.name = name;
       this.positionX = startX;
       this.positionY = startY;
       this.rotation = startDeg;
       this.simulateDrag();
-      
    }
    
    /* Movement */
@@ -217,19 +229,64 @@ public class Racer extends ImageView {
          "Speed: %.2f\n"+
          "MaxSpeed: %.2f\n"+
          "OldMax: %.2f\n"+
-         "MaxTurbo: %.2f\n",
+         "MaxTurbo: %.2f\n"+
+         "OnMapFalse: %s\n",
          this.positionX,
          this.positionY,
          this.rotation,
          this.speed,
          this.maxSpeed,
          this.oldMaxSpeed,
-         this.maxTurboSpeed
-      );
+         this.maxTurboSpeed,
+         this.onMapString
+         );
    }
    
    public double getMaxSpeed() {
       return this.maxSpeed;
+   }
+   
+   String onMapString = "";
+   
+   public boolean isRacerAt(int x, int y, double mapWidth, double mapHeight){
+      /*
+      positionX = 0
+      positionY = 0
+      private int racerHeight = 30;
+      private int racerWidth = 40;
+      private int sceneWidth = 1000;
+      private int sceneHeight = 600;
+      x = 500
+      y = 300
+      */
+      onMapString = "";
+      boolean out = true;
+      
+      // Left
+      if (positionX+(mapWidth/2)+(racerWidth/2)<x) {
+         onMapString += "LEFT ";
+         out = false;
+      }
+      // Right
+      if (positionX+(mapWidth/2)-(racerWidth/2)>x) {
+         onMapString += "RIGHT ";
+         out = false;
+      }
+      // Top
+      if (positionY+(mapHeight/2)+(racerHeight/2)<y) {
+         onMapString += "TOP ";
+         out = false;
+      }
+      // Bottom
+      if (positionY+(mapHeight/2)-(racerHeight/2)>y) {
+         onMapString += "BOTTOM ";
+         out = false;
+      }
+      //PixelReader pReader = maskImg.getPixelReader();
+      //Color color = pReader.getColor(x, y);
+      //System.out.println(color);
+      
+      return out;
    }
    
    public void update() {

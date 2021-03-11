@@ -37,9 +37,9 @@ public class CarRacer extends Application {
    private Race race;
    
    /* Racer constants */
-   private final double RACER_START_X = -394;
-   private final double RACER_START_Y = 72;
-   private final double RACER_START_DEG = -110;
+   private final double RACER_START_X = -450;
+   private final double RACER_START_Y = 10;
+   private final double RACER_START_DEG = 78;
 
    /* Map Constants */
    private static final String RACE_MAP = "assets/road2.png";
@@ -127,7 +127,16 @@ public class CarRacer extends Application {
       HBox fpControls = new HBox();
       Pane paneSpacer = new Pane();
       Button btnBack = new Button("Back");
-      Label lblFPS = race.getFrame();
+      Button btnDebug = new Button("Debug");
+      //Label lblFPS = race.getFrame();
+      //showDebbuger();
+      
+      btnDebug.setOnAction(
+         new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+               showDebugger();
+            }
+         });
       
       btnBack.setOnAction(
          new EventHandler<ActionEvent>() {
@@ -138,12 +147,13 @@ public class CarRacer extends Application {
          });
       
       fpControls.setHgrow(paneSpacer, Priority.ALWAYS);
-      fpControls.getChildren().addAll(btnBack, paneSpacer, lblFPS);
+      fpControls.getChildren().addAll(btnBack, paneSpacer, btnDebug);
       root.getChildren().add(fpControls);
    
       // Row 1
       Parent map = race.getMap();
       root.getChildren().add(map);
+      
       // Start race
       race.start();
       
@@ -176,7 +186,19 @@ public class CarRacer extends Application {
    /* Create race and add racer to it */
    public void initRace() {
       race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
-      race.setRacer(new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG));
+      //race.setRacer(new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG));
+      race.setRacer(new Racer("Dinko"));
+   }
+   
+   /* Debugger */
+   public void showDebugger() {
+      VBox root = new VBox();
+      Label lblFPS = race.getFrame();
+      root.getChildren().add(lblFPS);
+      Stage stage = new Stage();
+      stage.setTitle("Debug");
+      stage.setScene(new Scene(root, 300, 300));
+      stage.show();
    }
    
    /* Keyboard Handler */
@@ -210,6 +232,9 @@ public class CarRacer extends Application {
                   break;
                case SHIFT:
                   racer.goTurbo(true);
+                  break;
+               case F3:
+                  showDebugger();
                   break;
             }
             
