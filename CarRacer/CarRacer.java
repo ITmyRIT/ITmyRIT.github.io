@@ -144,7 +144,6 @@ public class CarRacer extends Application {
       // Row 1
       Parent map = race.getMap();
       root.getChildren().add(map);
-      root.setAlignment(Pos.CENTER);
       // Start race
       race.start();
       

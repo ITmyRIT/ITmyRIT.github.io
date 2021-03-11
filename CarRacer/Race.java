@@ -93,11 +93,16 @@ public class Race extends AnimationTimer {
       this.fps.setText(String.format("MaxSpeed: %.4f", speed));
    }
    
+   public void setDebug(String deb) {
+      this.fps.setText(deb);
+   }
+   
    @Override public void handle(long timeStamp) {
       racer.update();
       checkBorder(racer);
       
       //setFrame(timeStamp);
-      setShowSpeed(racer.getMaxSpeed());
+      //setShowSpeed(racer.getMaxSpeed());
+      setDebug(racer.doDebug());
    }
 }

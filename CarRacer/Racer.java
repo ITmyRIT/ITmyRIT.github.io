@@ -213,7 +213,7 @@ public class Racer extends ImageView {
       return String.format(
          "Position X: %.2f\n"+
          "Position Y: %.2f\n"+
-         "Position Rotation: %.2f\n"+
+         "Rotation: %.2f\n"+
          "Speed: %.2f\n"+
          "MaxSpeed: %.2f\n"+
          "OldMax: %.2f\n"+
@@ -237,11 +237,13 @@ public class Racer extends ImageView {
       if (-maxSpeed>maxTurboSpeed) maxSpeed = -maxTurboSpeed;
       if (speed>maxSpeed) speed = maxSpeed;
       if (-speed>maxSpeed) speed = -maxSpeed;
+      if (rotation>360) rotation -= 360;
+      if (rotation<-360) rotation += 360;
       this.positionX+=Math.cos(Math.toRadians(rotation))*speed;
       this.positionY+=Math.sin(Math.toRadians(rotation))*speed;
       this.setTranslateX(positionX);
       this.setTranslateY(positionY);
       this.setRotate(rotation);
-      System.out.println(doDebug());
+      //System.out.println(doDebug());
    }
 }
