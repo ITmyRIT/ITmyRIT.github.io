@@ -51,6 +51,7 @@ public class Racer extends StackPane {
    private TimerTask taskLeft;
    private TimerTask taskRight;
    private TimerTask taskTurbo;
+   private TimerTask taskRotate;
    
    // Old movement states
    private boolean goingForward = false;
@@ -58,39 +59,47 @@ public class Racer extends StackPane {
    private boolean goingLeft = false;
    private boolean goingRight = false;
    private boolean goingTurbo = false;
+   private boolean rotating = false;
    
    // Images
    private Image racerImg = null;
    private Image maskImg = null;
+   private ImageView racerView = null;
+   private ImageView maskView = null;
    
    public Racer(String name) {
-      racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
-      maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
+      this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
+      this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
       
-      ImageView racer = new ImageView(racerImg);
-      ImageView mask = new ImageView(maskImg);
+      this.racerView = new ImageView(racerImg);
+      this.maskView = new ImageView(maskImg);
       
-      this.getChildren().addAll(mask, racer);
+      this.getChildren().addAll(racerView, maskView);
       this.name = name;
       this.simulateDrag();
+      this.toggleMask();
    }
    
    public Racer(String name, double startX, double startY, double startDeg) {
-      racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
-      maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
+      this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
+      this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
       
-      ImageView racer = new ImageView(racerImg);
-      ImageView mask = new ImageView(maskImg);
+      this.racerView = new ImageView(racerImg);
+      this.maskView = new ImageView(maskImg);
       
-      this.getChildren().addAll(mask, racer);
+      this.getChildren().addAll(racerView, maskView);
       this.name = name;
       this.simulateDrag();
-      
       this.name = name;
       this.positionX = startX;
       this.positionY = startY;
       this.rotation = startDeg;
       this.simulateDrag();
+      this.toggleMask();
+   }
+   
+   public void toggleMask() {
+      this.maskView.setOpacity(this.maskView.getOpacity()==0?255:0);
    }
    
    /* Movement */
@@ -193,7 +202,10 @@ public class Racer extends StackPane {
                @Override public void run() {
                   synchronized(moveTimer) {
                      if(maxSpeed>oldMaxSpeed) maxSpeed-=ENGINE_FORCE;
-                     else taskTurbo.cancel();
+                     else {
+                        maxSpeed = oldMaxSpeed;
+                        taskTurbo.cancel();
+                     }
                   }
                }
             };
@@ -220,6 +232,29 @@ public class Racer extends StackPane {
             }
          }, 0, TIMER_TICK_RATE);
    }
+   
+   // Rotation
+   public void rotate(boolean go){
+      if (go && !rotating) {
+         taskRotate = 
+            new TimerTask() {
+               @Override public void run() {
+                  synchronized(moveTimer) {
+                     rotation+=ROTATION_DEG;
+                  }
+               }
+            };
+         moveTimer.scheduleAtFixedRate(taskRotate, 0, TIMER_TICK_RATE);
+         rotating = true;
+      } else if (!go && rotating){
+         taskRotate.cancel();
+         rotating=false;
+      }
+   }
+   
+   public boolean isRotating() {
+      return this.rotating;
+   }
 
    public String doDebug() {
       return String.format(
@@ -229,16 +264,14 @@ public class Racer extends StackPane {
          "Speed: %.2f\n"+
          "MaxSpeed: %.2f\n"+
          "OldMax: %.2f\n"+
-         "MaxTurbo: %.2f\n"+
-         "OnMapFalse: %s\n",
+         "MaxTurbo: %.2f\n",
          this.positionX,
          this.positionY,
          this.rotation,
          this.speed,
          this.maxSpeed,
          this.oldMaxSpeed,
-         this.maxTurboSpeed,
-         this.onMapString
+         this.maxTurboSpeed
          );
    }
    
@@ -246,47 +279,32 @@ public class Racer extends StackPane {
       return this.maxSpeed;
    }
    
-   String onMapString = "";
+   public double getPositionX () {
+      return this.positionX;
+   }
    
-   public boolean isRacerAt(int x, int y, double mapWidth, double mapHeight){
-      /*
-      positionX = 0
-      positionY = 0
-      private int racerHeight = 30;
-      private int racerWidth = 40;
-      private int sceneWidth = 1000;
-      private int sceneHeight = 600;
-      x = 500
-      y = 300
-      */
-      onMapString = "";
-      boolean out = true;
-      
-      // Left
-      if (positionX+(mapWidth/2)+(racerWidth/2)<x) {
-         onMapString += "LEFT ";
-         out = false;
-      }
-      // Right
-      if (positionX+(mapWidth/2)-(racerWidth/2)>x) {
-         onMapString += "RIGHT ";
-         out = false;
-      }
-      // Top
-      if (positionY+(mapHeight/2)+(racerHeight/2)<y) {
-         onMapString += "TOP ";
-         out = false;
-      }
-      // Bottom
-      if (positionY+(mapHeight/2)-(racerHeight/2)>y) {
-         onMapString += "BOTTOM ";
-         out = false;
-      }
-      //PixelReader pReader = maskImg.getPixelReader();
-      //Color color = pReader.getColor(x, y);
-      //System.out.println(color);
-      
-      return out;
+   public double getPositionY () {
+      return this.positionY;
+   }
+   
+   public int getRacerWidth() {
+      return this.racerWidth;
+   }
+   
+   public int getRacerHeight() {
+      return this.racerHeight;
+   }
+   
+   public void setPositionX(double x) {
+      this.positionX = x;
+   }
+   
+   public void setPositionY(double y) {
+      this.positionY = y;
+   }
+   
+   public void setRotation(double deg) {
+      this.rotation = deg;
    }
    
    public void update() {
@@ -301,6 +319,5 @@ public class Racer extends StackPane {
       this.setTranslateX(positionX);
       this.setTranslateY(positionY);
       this.setRotate(rotation);
-      //System.out.println(doDebug());
    }
 }

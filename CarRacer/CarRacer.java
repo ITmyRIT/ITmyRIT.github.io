@@ -30,19 +30,19 @@ public class CarRacer extends Application {
    // Stage (window)
    private Stage stage;
    private Scene scene;
-   private int sceneWidth = 1000;
-   private int sceneHeight = 600;
+   private int sceneWidth = 1008;
+   private int sceneHeight = 568;
 
    /* Race attributes */
    private Race race;
    
    /* Racer constants */
-   private final double RACER_START_X = -450;
-   private final double RACER_START_Y = 10;
-   private final double RACER_START_DEG = 78;
+   private final double RACER_START_X = 0;
+   private final double RACER_START_Y = 0;
+   private final double RACER_START_DEG = 0;
 
    /* Map Constants */
-   private static final String RACE_MAP = "assets/road2.png";
+   private static final String RACE_MAP = "assets/road.png";
    private static final String RACE_MASK = "assets/road-mask.png";
    
    /* Main method */
@@ -77,6 +77,8 @@ public class CarRacer extends Application {
       
       // Update scene
       stage.setScene(scene);
+      
+      stage.setResizable(false);
       
       // Show stage
       stage.show();
@@ -118,41 +120,13 @@ public class CarRacer extends Application {
    public Parent setupSingleplayer() {
       // Create new root pane
       VBox root = new VBox();
-      root.setPadding(new Insets(10, 10, 10, 10));
-      
+
       // Initialize Race
       initRace();
-      
-      // Row 0
-      HBox fpControls = new HBox();
-      Pane paneSpacer = new Pane();
-      Button btnBack = new Button("Back");
-      Button btnDebug = new Button("Debug");
-      //Label lblFPS = race.getFrame();
-      //showDebbuger();
-      
-      btnDebug.setOnAction(
-         new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-               showDebugger();
-            }
-         });
-      
-      btnBack.setOnAction(
-         new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-               updateScene(setupMenu());
-               race.stop();
-            }
-         });
-      
-      fpControls.setHgrow(paneSpacer, Priority.ALWAYS);
-      fpControls.getChildren().addAll(btnBack, paneSpacer, btnDebug);
-      root.getChildren().add(fpControls);
-   
-      // Row 1
+
       Parent map = race.getMap();
       root.getChildren().add(map);
+      root.setAlignment(Pos.CENTER);
       
       // Start race
       race.start();
@@ -194,7 +168,41 @@ public class CarRacer extends Application {
    public void showDebugger() {
       VBox root = new VBox();
       Label lblFPS = race.getFrame();
-      root.getChildren().add(lblFPS);
+      Button btnRotate = new Button("Rotate");
+      Button btnBackToStart = new Button("Start Position");
+      Button btnMapMask = new Button("Toggle Map Mask");
+      Button btnRacerMask = new Button("Toggle Racer Mask");
+      btnRotate.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               if (race.getRacer().isRotating()) {
+                  race.getRacer().rotate(false);
+               } else {
+                  race.getRacer().rotate(true);
+               }
+            }
+         });
+      btnBackToStart.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               race.getRacer().setPositionX(RACER_START_X);
+               race.getRacer().setPositionY(RACER_START_Y);
+               race.getRacer().setRotation(RACER_START_DEG);
+            }
+         });
+      btnMapMask.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               race.toggleMask();
+            }
+         });
+      btnRacerMask.setOnAction(
+         new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+               race.getRacer().toggleMask();
+            }
+         });
+      root.getChildren().addAll(lblFPS, btnRotate, btnBackToStart, btnMapMask, btnRacerMask);
       Stage stage = new Stage();
       stage.setTitle("Debug");
       stage.setScene(new Scene(root, 300, 300));
@@ -235,6 +243,10 @@ public class CarRacer extends Application {
                   break;
                case F3:
                   showDebugger();
+                  break;
+               case ESCAPE:
+                  updateScene(setupMenu());
+                  race.stop();
                   break;
             }
             
