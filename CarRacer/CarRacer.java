@@ -16,6 +16,7 @@ import javafx.geometry.*;
 import javafx.animation.*;
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 /*
  * Final Project - Car Racer 
@@ -45,6 +46,10 @@ public class CarRacer extends Application {
    private static final String RACE_MAP = "assets/road.png";
    private static final String RACE_MASK = "assets/road-mask.png";
    
+   /* Multiplayer Constants */
+   private static final boolean MULTIPLAYER = true;
+   private static final boolean SINGLEPLAYER = false;
+   
    /* Main method */
    public static void main(String[]args) {
       launch(args);
@@ -53,8 +58,7 @@ public class CarRacer extends Application {
    /* Method called by launch(args) */
    @Override public void start(Stage stage) {
       this.stage = stage;
-      
-      stage.setResizable(true);
+   
       stage.setTitle("Car Racer");
       stage.setOnCloseRequest(
          new EventHandler<WindowEvent>() {
@@ -120,10 +124,16 @@ public class CarRacer extends Application {
    public Parent setupSingleplayer() {
       // Create new root pane
       VBox root = new VBox();
-
+   
       // Initialize Race
-      initRace();
-
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      
+      // Initialize Racer
+      // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);
+      Racer racer = new Racer("Dinko");
+      
+      race.setRacer(racer);
+   
       Parent map = race.getMap();
       root.getChildren().add(map);
       root.setAlignment(Pos.CENTER);
@@ -134,36 +144,34 @@ public class CarRacer extends Application {
       // Return root
       return root;
    }
-   
+
    /* Create and return the MultiPlayer Race GUI */
    public Parent setupMultiplayer() {
-      // Create new root pane
+       // Create new root pane
       VBox root = new VBox();
       
-      Button btnBack = new Button("Back");
       
-      btnBack.setPrefWidth(300);
-      btnBack.setOnAction(
-         new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-               updateScene(setupMenu());
-            }
-         });
-         
+      // Initialize Race
+      
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      
+      // Initialize Racer
+      // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);
+      Racer racer = new Racer("Dinko");
+      
+      race.setRacer(racer);
+      
+      Parent map = race.getMap();
+      root.getChildren().add(map);
       root.setAlignment(Pos.CENTER);
-      root.getChildren().addAll(btnBack);
+      
+      // Start race
+      race.start();
       
       // Return root
       return root;
    }
-   
-   /* Create race and add racer to it */
-   public void initRace() {
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
-      //race.setRacer(new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG));
-      race.setRacer(new Racer("Dinko"));
-   }
-   
+      
    /* Debugger */
    public void showDebugger() {
       VBox root = new VBox();
@@ -275,4 +283,6 @@ public class CarRacer extends Application {
             }
          });
    }
+   
+   
 }
