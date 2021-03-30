@@ -68,7 +68,7 @@ public class Race extends AnimationTimer {
       this.racerPane = new StackPane();
       this.racersPane = new StackPane();
       this.racers = new ArrayList<Racer>();
-      if (multiplayer) this.client = new CarRacerClient(/*"192.168.0.164"*/null, SERVER_PORT);
+      if (multiplayer) this.client = new CarRacerClient("192.168.0.164", SERVER_PORT);
       this.racer2 = new Racer("Dinko", 0, 0, 0);
       racersPane.getChildren().add(this.racer2);
    }
