@@ -287,6 +287,10 @@ public class Racer extends StackPane {
       return this.positionY;
    }
    
+   public double getRotation(){
+      return this.rotation;
+   }
+   
    public int getRacerWidth() {
       return this.racerWidth;
    }

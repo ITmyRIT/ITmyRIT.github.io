@@ -56,8 +56,10 @@ public class Race extends AnimationTimer {
    /* Networking */
    private static final int SERVER_PORT = 12345;
    
+   Racer racer2;
+   
    // SinglePlayer
-   public Race(String roadImage, String roadMask, int roadWidth, int roadHeight){
+   public Race(String roadImage, String roadMask, int roadWidth, int roadHeight, boolean multiplayer){
       this.roadImage = roadImage;
       this.roadMask = roadMask;
       this.roadWidth = roadWidth;
@@ -66,7 +68,9 @@ public class Race extends AnimationTimer {
       this.racerPane = new StackPane();
       this.racersPane = new StackPane();
       this.racers = new ArrayList<Racer>();
-      this.client = new CarRacerClient(null, SERVER_PORT);
+      if (multiplayer) this.client = new CarRacerClient(/*"192.168.0.164"*/null, SERVER_PORT);
+      this.racer2 = new Racer("Dinko", 0, 0, 0);
+      racersPane.getChildren().add(this.racer2);
    }
    
    public void setRacer(Racer racer){
@@ -109,7 +113,19 @@ public class Race extends AnimationTimer {
    
    public void updateRacers() {
       
-      this.client.sendObject(new Double(racer.getPositionX()));
+      Position position = new Position();
+      position.setPositionX(racer.getPositionX());
+      position.setPositionY(racer.getPositionY());
+      position.setRotation(racer.getRotation());
+      
+      
+      this.client.sendObject(position);
+      
+      position = (Position)this.client.receiveObject();
+      racer2.setPositionX(position.getPositionX());
+      racer2.setPositionY(position.getPositionY());
+      racer2.setRotation(position.getRotation());
+      
       /*
       this.racers = (ArrayList<Racer>) this.client.receiveObject();
       this.racersPane = new StackPane();
@@ -118,8 +134,12 @@ public class Race extends AnimationTimer {
    }
    
    @Override public void handle(long timeStamp) {
-      racer.update();
       updateRacers();
+      
+      racer.update();
+      racer2.update();
+      
+      
       
       setDebug(racer.doDebug());
    }

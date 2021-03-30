@@ -126,7 +126,7 @@ public class CarRacer extends Application {
       VBox root = new VBox();
    
       // Initialize Race
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight, SINGLEPLAYER);
       
       // Initialize Racer
       // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);
@@ -153,7 +153,7 @@ public class CarRacer extends Application {
       
       // Initialize Race
       
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight, MULTIPLAYER);
       
       // Initialize Racer
       // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);

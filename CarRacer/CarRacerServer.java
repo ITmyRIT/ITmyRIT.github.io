@@ -41,6 +41,10 @@ public class CarRacerServer extends Application {
    // GUI
    private TextArea taLog = null;
    
+   // Clients 
+   ClientThread ct1;
+   ClientThread ct2;
+   
    /* Main method */
    public static void main(String[]args) {
       launch(args);
@@ -117,9 +121,12 @@ public class CarRacerServer extends Application {
       public void run() {
          try {
             sSocket = new ServerSocket(SERVER_PORT);
-            while(true) {
-               new ClientThread(sSocket.accept()).start();
-            }
+            //while(true) {
+               ct1 = new ClientThread(sSocket.accept(), 1);
+               ct2 = new ClientThread(sSocket.accept(), 2);
+               ct1.start();
+               ct2.start();
+            //}
          } catch (IOException e) {
             e.printStackTrace();
          }
@@ -129,13 +136,15 @@ public class CarRacerServer extends Application {
    
    class ClientThread extends Thread {
       private Socket socket = null;
+      private int ID;
       
       // Streams
       private ObjectInputStream ois;
       private ObjectOutputStream oos;
         
-      public ClientThread(Socket socket) {
+      public ClientThread(Socket socket, int ID) {
          this.socket = socket;
+         this.ID = ID;
          try {
             ois = new ObjectInputStream(socket.getInputStream());
             oos = new ObjectOutputStream(socket.getOutputStream());
@@ -149,6 +158,7 @@ public class CarRacerServer extends Application {
             
             Object input = receiveObject();
             
+            
             if (input instanceof String) {
                if (((String)input).equals("STOP")) {
                   try {
@@ -159,6 +169,9 @@ public class CarRacerServer extends Application {
                   }
                }
             }
+            
+            if(this.ID==1) ct2.sendObject(input);
+            if(this.ID==2) ct1.sendObject(input);
          }
          
          
