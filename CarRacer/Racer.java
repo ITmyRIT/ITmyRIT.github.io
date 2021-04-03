@@ -36,12 +36,12 @@ public class Racer extends StackPane {
    private double positionX = 0;
    private double positionY = 0;
    private double speed = 0.0;
-   private double maxSpeed = 2.0;
+   private double maxSpeed = 3.0;
    private double oldMaxSpeed = maxSpeed;
-   private double maxTurboSpeed = 4.0;
+   private double maxTurboSpeed = 5.0;
    private double rotation = 0;
-   private int racerHeight = 15;
-   private int racerWidth = 20;
+   private int racerHeight = 20;
+   private int racerWidth = 30;
    private String name;
    
    // Movement Timers
@@ -149,7 +149,7 @@ public class Racer extends StackPane {
             new TimerTask() {
                @Override public void run() {
                   synchronized(moveTimer) {
-                     rotation-=ROTATION_DEG*(speed==0?0:(oldMaxSpeed/speed));
+                     rotation-=ROTATION_DEG*(Math.abs(speed)<2?(speed/oldMaxSpeed):(oldMaxSpeed/speed));
                   }
                }
             };
@@ -168,7 +168,7 @@ public class Racer extends StackPane {
             new TimerTask() {
                @Override public void run() {
                   synchronized(moveTimer) {
-                     rotation+=ROTATION_DEG*(speed==0?0:oldMaxSpeed/speed);
+                     rotation+=ROTATION_DEG*(Math.abs(speed)<2?(speed/oldMaxSpeed):(oldMaxSpeed/speed));
                   }
                }
             };
