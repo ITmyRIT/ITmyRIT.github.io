@@ -311,6 +311,20 @@ public class Racer extends StackPane {
       this.rotation = deg;
    }
    
+   public void setPosition(Position pos) {
+      this.setPositionX(pos.getPositionX());
+      this.setPositionY(pos.getPositionY());
+      this.setRotation(pos.getRotation());
+   }
+   
+   public Position getPosition() {
+      return new Position(
+         this.getPositionX(),
+         this.getPositionY(),
+         this.getRotation()
+      );
+   }
+   
    public void update() {
       if (maxSpeed>maxTurboSpeed) maxSpeed = maxTurboSpeed;
       if (-maxSpeed>maxTurboSpeed) maxSpeed = -maxTurboSpeed;
