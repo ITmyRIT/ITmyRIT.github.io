@@ -48,4 +48,14 @@ public class Position implements Serializable{
       return this.rotation;
    }
    
+   public String toString(){
+      return String.format(
+         "%s\nX: %f\nY: %f\n R: %f\n",
+         "*".repeat(10),
+         this.getPositionX(),
+         this.getPositionY(),
+         this.getRotation()
+      );
+   }
+   
 }

@@ -179,7 +179,8 @@ public class CarRacerServer extends Application {
       
       public void sendObject(Object object) {
          try {
-            System.out.println("Sending: "+object);
+            //System.out.println("Sending: "+object);
+            taLog.appendText(String.format("Sending to %s: %s\n", this.getName(), (Position)object));
             oos.writeObject(object);
             oos.flush();
          } catch (IOException e) {
@@ -190,7 +191,8 @@ public class CarRacerServer extends Application {
       public Object receiveObject() {
          try {
             Object object = ois.readObject();
-            System.out.println("Received: "+object);
+            taLog.appendText(String.format("Received from %s: %s\n", this.getName(), (Position)object));
+            //System.out.println("Received: "+object);
             return object;
          } catch (Exception e) {
             e.printStackTrace();

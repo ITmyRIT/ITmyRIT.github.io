@@ -29,8 +29,8 @@ public class Racer extends StackPane {
    private final static String racerImage = "assets/car.png";
    private final static String racerMask = "assets/car-mask.png";
    private final static double DRAG_FORCE = 0.005;
-   private final static double ENGINE_FORCE = 0.05;
-   private final static double ROTATION_DEG = 0.6;
+   private final static double ENGINE_FORCE = 0.02;
+   private final static double ROTATION_DEG = 0.9;
    private final static int TIMER_TICK_RATE = 4;
    
    private double positionX = 0;
@@ -40,8 +40,8 @@ public class Racer extends StackPane {
    private double oldMaxSpeed = maxSpeed;
    private double maxTurboSpeed = 4.0;
    private double rotation = 0;
-   private int racerHeight = 30;
-   private int racerWidth = 40;
+   private int racerHeight = 15;
+   private int racerWidth = 20;
    private String name;
    
    // Movement Timers
@@ -149,7 +149,7 @@ public class Racer extends StackPane {
             new TimerTask() {
                @Override public void run() {
                   synchronized(moveTimer) {
-                     rotation-=ROTATION_DEG*(speed==0?0:speed/maxSpeed);
+                     rotation-=ROTATION_DEG*(speed==0?0:(oldMaxSpeed/speed));
                   }
                }
             };
@@ -168,7 +168,7 @@ public class Racer extends StackPane {
             new TimerTask() {
                @Override public void run() {
                   synchronized(moveTimer) {
-                     rotation+=ROTATION_DEG*(speed==0?0:speed/maxSpeed);
+                     rotation+=ROTATION_DEG*(speed==0?0:oldMaxSpeed/speed);
                   }
                }
             };

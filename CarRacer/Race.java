@@ -56,9 +56,6 @@ public class Race extends AnimationTimer {
    /* Networking */
    private static final int SERVER_PORT = 12345;
    
-   Racer racer2;
-   
-   // SinglePlayer
    public Race(String roadImage, String roadMask, int roadWidth, int roadHeight, boolean multiplayer){
       this.roadImage = roadImage;
       this.roadMask = roadMask;
@@ -68,9 +65,7 @@ public class Race extends AnimationTimer {
       this.racerPane = new StackPane();
       this.racersPane = new StackPane();
       this.racers = new ArrayList<Racer>();
-      if (multiplayer) this.client = new CarRacerClient("192.168.0.164", SERVER_PORT);
-      this.racer2 = new Racer("Dinko", 0, 0, 0);
-      racersPane.getChildren().add(this.racer2);
+
    }
    
    public void setRacer(Racer racer){
@@ -113,18 +108,6 @@ public class Race extends AnimationTimer {
    
    public void updateRacers() {
       
-      Position position = new Position();
-      position.setPositionX(racer.getPositionX());
-      position.setPositionY(racer.getPositionY());
-      position.setRotation(racer.getRotation());
-      
-      
-      this.client.sendObject(position);
-      
-      position = (Position)this.client.receiveObject();
-      racer2.setPositionX(position.getPositionX());
-      racer2.setPositionY(position.getPositionY());
-      racer2.setRotation(position.getRotation());
       
       /*
       this.racers = (ArrayList<Racer>) this.client.receiveObject();
@@ -134,12 +117,8 @@ public class Race extends AnimationTimer {
    }
    
    @Override public void handle(long timeStamp) {
-      updateRacers();
-      
+
       racer.update();
-      racer2.update();
-      
-      
       
       setDebug(racer.doDebug());
    }
