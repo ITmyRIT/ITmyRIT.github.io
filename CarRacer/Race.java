@@ -15,6 +15,7 @@ import javafx.animation.*;
 import java.io.*;
 import java.util.*;
 import javafx.scene.image.*;
+import javafx.scene.paint.Color;
 
 /*
  * Final Project - Car Racer 
@@ -33,12 +34,12 @@ public class Race extends AnimationTimer {
    private int roadWidth;
    private int roadHeight;
    
-   /* Racer */
+   /* Player */
+   private String nickname = "";
    private Racer racer;
-   private ArrayList<Racer> racers;
    
-   /* FPS */
-   private Label fps;
+   /* Label Debug */
+   private Label lblDebug;
    
    /* Images */
    private Image mapImg = null;
@@ -53,19 +54,30 @@ public class Race extends AnimationTimer {
    StackPane racerPane = null;
    StackPane racersPane = null;
    
+   Hashtable<String, Racer> racers = new Hashtable<String, Racer>();
+   
+   /* My Position */
+   Position myPosition = new Position();
+   
    /* Networking */
    private static final int SERVER_PORT = 12345;
+         
+   /* Collision */
+   private String collisionDebug = "";
    
-   public Race(String roadImage, String roadMask, int roadWidth, int roadHeight, boolean multiplayer){
+   public Race(String roadImage, String roadMask, int roadWidth, int roadHeight){
       this.roadImage = roadImage;
       this.roadMask = roadMask;
       this.roadWidth = roadWidth;
       this.roadHeight = roadHeight;
-      this.fps = new Label();
+      this.lblDebug = new Label();
       this.racerPane = new StackPane();
       this.racersPane = new StackPane();
-      this.racers = new ArrayList<Racer>();
-
+   }
+   
+   public void connectToServer() {
+      this.client = new CarRacerClient("", 12345, racer);
+      this.client.start();
    }
    
    public void setRacer(Racer racer){
@@ -86,8 +98,15 @@ public class Race extends AnimationTimer {
       mapView = new ImageView(mapImg);
       maskView = new ImageView(maskImg);
       
-      // Append Map to root
-      root.getChildren().addAll(mapView, maskView, racerPane, racersPane);      
+      // Append Map to pane
+      Pane pane = new Pane();
+      
+      pane.setPrefHeight(roadHeight);
+      pane.setPrefWidth(roadWidth);
+      
+      pane.getChildren().addAll(mapView, maskView, racerPane, racersPane);      
+     
+      root.getChildren().add(pane);
       toggleMask();
       
       // Return root
@@ -99,27 +118,62 @@ public class Race extends AnimationTimer {
    }
 
    public void setDebug(String deb) {
-      this.fps.setText(deb);
+      this.lblDebug.setText(deb);
    }
    
    public Label getFrame() {
-      return this.fps;
+      return this.lblDebug;
    }
    
    public void updateRacers() {
+      Hashtable<String, Position> positions = client.getPositions();
+      for (String key:positions.keySet()) {
+         if (racers.containsKey(key)) {
+            racers.get(key).setPosition(positions.get(key));
+            racers.get(key).update();
+         } else {
+            Racer racer = new Racer(key);
+            racer.setPosition(positions.get(key));
+            racers.put(key, racer);
+            racersPane.getChildren().add(racer);
+         }
+         
+         if (racer.getNickname().equals(key)) {
+            racers.get(key).hide();
+         }
+      }
       
-      
-      /*
-      this.racers = (ArrayList<Racer>) this.client.receiveObject();
-      this.racersPane = new StackPane();
-      for(Racer r:racers) racersPane.getChildren().add(r);
-      */
    }
    
-   @Override public void handle(long timeStamp) {
+   public void checkCollision() {
+      PixelReader pixelReader = maskImg.getPixelReader();
+      int centerX = (int)racer.getPositionX()+(int)(racer.getRacerWidth()/2);
+      int centerY = (int)racer.getPositionY()+(int)(racer.getRacerHeight()/2);
+      Color color = pixelReader.getColor(centerX, centerY);
+      collisionDebug = String.format(
+         "\nCOLORS\nRED: %d\nGREEN: %d\nBLUE: %d\n",
+         (int)color.getRed()*256, (int)color.getGreen()*256, (int)color.getBlue()*256
+         );
+      if (color.equals(Color.rgb(255,0,0))) {
+         System.out.println("OUUUT");
+         racer.loseControl();
+      }
+   }
 
+   @Override public void handle(long timeStamp) {
       racer.update();
-      
-      setDebug(racer.doDebug());
+      checkCollision();
+         new Thread() {
+            public void run() {
+               Platform.runLater(
+                     new Runnable() {
+                        public void run() {
+                           updateRacers();
+                        }
+                     }
+                  );
+            }
+         }.start();
+      setDebug(racer.doDebug()+collisionDebug);
    }
 }

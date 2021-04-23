@@ -17,6 +17,8 @@ import javafx.animation.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import javafx.scene.text.Font;
+import java.awt.Color;
 
 /*
  * Final Project - Car Racer 
@@ -38,17 +40,16 @@ public class CarRacer extends Application {
    private Race race;
    
    /* Racer constants */
-   private final double RACER_START_X = 0;
-   private final double RACER_START_Y = 0;
-   private final double RACER_START_DEG = 0;
+   private final double RACER_START_X = 34;
+   private final double RACER_START_Y = 304;
+   private final double RACER_START_DEG = -288;
 
    /* Map Constants */
    private static final String RACE_MAP = "assets/road.png";
-   private static final String RACE_MASK = "assets/road-mask.png";
+   private static final String RACE_MASK = "assets/road-mask-green-red.png";
    
-   /* Multiplayer Constants */
-   private static final boolean MULTIPLAYER = true;
-   private static final boolean SINGLEPLAYER = false;
+   /* Player */
+   private String nickname = "";
    
    /* Main method */
    public static void main(String[]args) {
@@ -59,7 +60,7 @@ public class CarRacer extends Application {
    @Override public void start(Stage stage) {
       this.stage = stage;
    
-      stage.setTitle("Car Racer");
+      stage.setTitle("Space Racer");
       stage.setOnCloseRequest(
          new EventHandler<WindowEvent>() {
             public void handle(WindowEvent evt) {
@@ -72,6 +73,9 @@ public class CarRacer extends Application {
    
    /* Method to display another scene */
    public void updateScene(Parent root) {
+   
+      // Loading screen
+      loadingScreen();
    
       // Create new scene
       scene = new Scene(root, sceneWidth, sceneHeight);
@@ -91,86 +95,92 @@ public class CarRacer extends Application {
    /* Create and return the Menu GUI */
    public Parent setupMenu() {
       // Create new root pane
-      VBox root = new VBox();
+      VBox root = new VBox(8);
+      Image image = null;
       
-      Button btnSingleplayer = new Button("Singleplayer");
-      Button btnMultiplayer = new Button("Multiplayer");
+      // Creating an image 
+      try{
+         image = new Image(new FileInputStream("assets/logo.png"));
+      }
+      catch(FileNotFoundException fnfe){
+         fnfe.printStackTrace();
+      }  
+      ImageView imageView = new ImageView(image); 
       
-      btnSingleplayer.setPrefWidth(300);
-      btnMultiplayer.setPrefWidth(300);
+      TextField tfNick = new TextField();
       
-      btnSingleplayer.setOnAction(
-         new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-               updateScene(setupSingleplayer());
-            }
-         });
+      // Instantiate buttons
+      Button btnPlay = new Button("Play");
+      
+      // Assign fonts
+      Font font = Font.loadFont("assets/font/Montserrat-Bold.ttf", 45);
+      btnPlay.setFont(font);
+      tfNick.setFont(font);
+      
+      // CSS Style
+      btnPlay.setStyle("-fx-font: 22 montserrat; -fx-base: #000000;-fx-text-fill: white;-fx-border-color:#42f5ef;-fx-border-width: 2 2 2 2; -fx-border-radius: 20px; -fx-background-radius: 20px;");
+      tfNick.setStyle("-fx-font: 22 montserrat; -fx-base: #000000;-fx-text-fill: white;-fx-border-color:#42f5ef;-fx-border-width: 2 2 2 2; -fx-border-radius: 20px; -fx-background-radius: 20px;");
+      root.setStyle("-fx-background-color: #000000;");
+      
+      // Width of buttons
+      btnPlay.setPrefWidth(300);
+      tfNick.setMaxWidth(300);
+      tfNick.setAlignment(Pos.CENTER);
          
-      btnMultiplayer.setOnAction(
+      btnPlay.setOnAction(
          new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-               updateScene(setupMultiplayer());
+               nickname = tfNick.getText();
+               updateScene(setupGame());
             }
          });
          
       root.setAlignment(Pos.CENTER);
-      root.getChildren().addAll(btnSingleplayer, btnMultiplayer);
+      root.getChildren().addAll(imageView, tfNick, btnPlay);
       
       // Return root
       return root;
    }
    
-   /* Create and return the SinglePlayer Race GUI */
-   public Parent setupSingleplayer() {
-      // Create new root pane
-      VBox root = new VBox();
-   
+      
+   /* Create and return the MultiPlayer Race GUI */
+   public Parent setupGame() {
+       // Create new root pane
+      VBox root = new VBox(8);
+      
+      
       // Initialize Race
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight, SINGLEPLAYER);
+      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
       
       // Initialize Racer
-      // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);
-      Racer racer = new Racer("Dinko");
+      Racer racer = new Racer(nickname, RACER_START_X, RACER_START_Y, RACER_START_DEG);
+      //Racer racer = new Racer(nickname);
       
       race.setRacer(racer);
-   
-      Parent map = race.getMap();
-      root.getChildren().add(map);
-      root.setAlignment(Pos.CENTER);
+      race.connectToServer();
+      
+      
+      root.getChildren().add(race.getMap());
+      //root.setAlignment(Pos.CENTER);
       
       // Start race
       race.start();
+      
+      // Return root
+      return root;
+   }
+   
+    /* Create and return the SinglePlayer Race GUI */
+   public Parent loadingScreen() {
+      // Create new root pane
+      VBox root = new VBox(8);
+   
+      root.setAlignment(Pos.CENTER);
       
       // Return root
       return root;
    }
 
-   /* Create and return the MultiPlayer Race GUI */
-   public Parent setupMultiplayer() {
-       // Create new root pane
-      VBox root = new VBox();
-      
-      
-      // Initialize Race
-      
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight, MULTIPLAYER);
-      
-      // Initialize Racer
-      // Racer racer = new Racer("Dinko", RACER_START_X, RACER_START_Y, RACER_START_DEG);
-      Racer racer = new Racer("Dinko");
-      
-      race.setRacer(racer);
-      
-      Parent map = race.getMap();
-      root.getChildren().add(map);
-      root.setAlignment(Pos.CENTER);
-      
-      // Start race
-      race.start();
-      
-      // Return root
-      return root;
-   }
       
    /* Debugger */
    public void showDebugger() {

@@ -5,31 +5,41 @@ import java.net.*;
 public class CarRacerClient extends Thread {
    /* Networking */
    private Socket socket = null;
-   ObjectOutputStream oos = null;
-   ObjectInputStream ois = null;
+   private ObjectOutputStream oos = null;
+   private ObjectInputStream ois = null;
    
-   Racer racer = null;
-   Racer racer2 = new Racer("");
+   // Hashtable
+   private Hashtable<String, Position> positions = new Hashtable<String, Position>();
    
-   public CarRacerClient(String ipAddress, int port) {
+   private Racer racer = null;
+   
+   public CarRacerClient(String ipAddress, int port, Racer racer) {
+      this.racer = racer;
+   
       try{
+      
          socket = new Socket(ipAddress, port);
-         System.out.println("Connected!");
-       
          oos = new ObjectOutputStream(socket.getOutputStream());
          ois = new ObjectInputStream(socket.getInputStream());
-      
+         
+         // Writing nickname
+         oos.writeObject(racer.getNickname());
+         oos.flush();
+         
+         // Writing position
+         oos.writeObject(new Position(racer.getPosition()));
+         oos.flush();
+         
       }catch(UnknownHostException uhe){
          uhe.printStackTrace();
       }catch(IOException ioe){
          ioe.printStackTrace();
       }
-       
    }
    
    public void close() {
       try{
-      
+         socket.close();
          oos.close();
          ois.close();
       }catch(UnknownHostException uhe){
@@ -39,51 +49,40 @@ public class CarRacerClient extends Thread {
       }
    }
    
-   public void sendObject(Object object) {
+   public void run() {
       try {
-         //System.out.println("Sending: "+object);
-         oos.writeObject(object);
-         oos.flush();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-   }
-
-   public Object receiveObject() {
-      try {
-         Object object = ois.readObject();
-         //System.out.println("Received: "+object);
-         return object;
+            new Thread() {
+               public void run() {
+                  while (true) {
+                     try {
+                        // WRITING 
+                        oos.writeObject(new Position(racer.getPosition()));
+                        oos.flush();
+                        Thread.sleep(45);
+                     } catch (Exception e) {
+                        e.printStackTrace();
+                     }
+                  }
+               }
+            }.start();
+            new Thread() {
+               public void run() {
+                  while (true) {
+                     try {
+                        // READING
+                        positions = (Hashtable<String, Position>) ois.readObject();
+                     } catch (Exception e) {
+                        e.printStackTrace();
+                     }
+                  }
+               }
+            }.start();
       } catch (Exception e) {
          e.printStackTrace();
-         return null;
       }
    }
    
-   public void run() {
-      
-      while(true) {
-      Position myPosition = new Position();
-      myPosition.setPositionX(racer.getPositionX());
-      myPosition.setPositionY(racer.getPositionY());
-      myPosition.setRotation(racer.getRotation());
-      this.sendObject(myPosition);
-      
-      Position opponentPosition = (Position)this.receiveObject();
-      racer2.setPositionX(opponentPosition.getPositionX());
-      racer2.setPositionY(opponentPosition.getPositionY());
-      racer2.setRotation(opponentPosition.getRotation());
-      
-      System.out.println(opponentPosition.getPositionX());
-      System.out.println(opponentPosition.getPositionY());
-      }
-   }
-   
-   public Racer getRacer() {
-      return this.racer2;
-   }
-   
-   public void setRacer(Racer racer) {
-      this.racer = racer;
+   public Hashtable<String, Position> getPositions() {
+      return positions;
    }
 }

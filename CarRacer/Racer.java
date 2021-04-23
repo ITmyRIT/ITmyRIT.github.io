@@ -27,7 +27,7 @@ import java.lang.Math;
  
 public class Racer extends StackPane {
    private final static String racerImage = "assets/car.png";
-   private final static String racerMask = "assets/car-mask.png";
+   private final static String racerMask = "assets/car-mask-blue.png";
    private final static double DRAG_FORCE = 0.005;
    private final static double ENGINE_FORCE = 0.02;
    private final static double ROTATION_DEG = 0.9;
@@ -42,7 +42,6 @@ public class Racer extends StackPane {
    private double rotation = 0;
    private int racerHeight = 20;
    private int racerWidth = 30;
-   private String name;
    
    // Movement Timers
    private Timer moveTimer = new Timer();
@@ -67,7 +66,14 @@ public class Racer extends StackPane {
    private ImageView racerView = null;
    private ImageView maskView = null;
    
-   public Racer(String name) {
+   // Nickname
+   private String nickname = null;
+   
+   // Control
+   private boolean keyboard = true;
+   
+   public Racer(String nickname) {
+      this.nickname = nickname;
       this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
       this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
       
@@ -75,12 +81,12 @@ public class Racer extends StackPane {
       this.maskView = new ImageView(maskImg);
       
       this.getChildren().addAll(racerView, maskView);
-      this.name = name;
       this.simulateDrag();
       this.toggleMask();
    }
    
-   public Racer(String name, double startX, double startY, double startDeg) {
+   public Racer(String nickname, double startX, double startY, double startDeg) {
+      this.nickname = nickname;
       this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
       this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
       
@@ -88,24 +94,29 @@ public class Racer extends StackPane {
       this.maskView = new ImageView(maskImg);
       
       this.getChildren().addAll(racerView, maskView);
-      this.name = name;
       this.simulateDrag();
-      this.name = name;
+      this.toggleMask();
+      
       this.positionX = startX;
       this.positionY = startY;
       this.rotation = startDeg;
-      this.simulateDrag();
-      this.toggleMask();
    }
    
    public void toggleMask() {
       this.maskView.setOpacity(this.maskView.getOpacity()==0?255:0);
    }
    
+   public void hide() {
+      this.racerView.setOpacity(0);
+      this.maskView.setOpacity(0);
+   }
+   
    /* Movement */
    
    // Forward
    public void goFoward(boolean go) {
+      if (!keyboard) 
+         return;
       if (go && !goingForward) {
          taskForward = 
             new TimerTask() {
@@ -125,6 +136,8 @@ public class Racer extends StackPane {
    
    // Backward
    public void goBackward(boolean go) {
+      if (!keyboard) 
+         return;
       if (go && !goingBackward) {
          taskBackward = 
             new TimerTask() {
@@ -144,6 +157,8 @@ public class Racer extends StackPane {
    
    // Left
    public void goLeft(boolean go) {
+      if (!keyboard) 
+         return;
       if (go && !goingLeft) {
          taskLeft = 
             new TimerTask() {
@@ -163,6 +178,8 @@ public class Racer extends StackPane {
    
    // Right
    public void goRight(boolean go) {
+      if (!keyboard) 
+         return;
       if (go && !goingRight) {
          taskRight = 
             new TimerTask() {
@@ -252,6 +269,12 @@ public class Racer extends StackPane {
       }
    }
    
+   public void loseControl() {
+      this.maxSpeed = this.speed;
+      this.goFoward(true);
+      this.keyboard = false;
+   }
+   
    public boolean isRotating() {
       return this.rotating;
    }
@@ -315,14 +338,24 @@ public class Racer extends StackPane {
       this.setPositionX(pos.getPositionX());
       this.setPositionY(pos.getPositionY());
       this.setRotation(pos.getRotation());
+      this.setNickname(pos.getNickname());
    }
    
    public Position getPosition() {
       return new Position(
          this.getPositionX(),
          this.getPositionY(),
-         this.getRotation()
-      );
+         this.getRotation(),
+         this.getNickname()
+         );
+   }
+   
+   public void setNickname(String nickname) {
+      this.nickname = nickname;
+   }
+   
+   public String getNickname(){
+      return this.nickname;
    }
    
    public void update() {
