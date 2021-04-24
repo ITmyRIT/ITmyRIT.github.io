@@ -25,18 +25,18 @@ import java.lang.Math;
  * Represents individual Racer
  */
  
-public class Racer extends StackPane {
+public class Racer extends Pane {
    private final static String racerImage = "assets/car.png";
    private final static String racerMask = "assets/car-mask-blue.png";
-   private final static double DRAG_FORCE = 0.005;
-   private final static double ENGINE_FORCE = 0.02;
-   private final static double ROTATION_DEG = 0.9;
+   private final static double DRAG_FORCE = 0.002;
+   private final static double ENGINE_FORCE = 0.03;
+   private final static double ROTATION_DEG = 0.8;
    private final static int TIMER_TICK_RATE = 4;
    
    private double positionX = 0;
    private double positionY = 0;
    private double speed = 0.0;
-   private double maxSpeed = 3.0;
+   private double maxSpeed = 2.4;
    private double oldMaxSpeed = maxSpeed;
    private double maxTurboSpeed = 5.0;
    private double rotation = 0;
@@ -67,6 +67,7 @@ public class Racer extends StackPane {
    private ImageView maskView = null;
    
    // Nickname
+   private Label lblNickname = null;
    private String nickname = null;
    
    // Control
@@ -74,29 +75,38 @@ public class Racer extends StackPane {
    
    public Racer(String nickname) {
       this.nickname = nickname;
+      
+      StackPane imgStack = new StackPane();
       this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
       this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
       
       this.racerView = new ImageView(racerImg);
       this.maskView = new ImageView(maskImg);
       
-      this.getChildren().addAll(racerView, maskView);
+      imgStack.getChildren().addAll(racerView, maskView);
+   
+      lblNickname = new Label(nickname);
+      lblNickname.setTextFill(Color.rgb(255, 255, 255));
+      
+      lblNickname.setTranslateX(-20);
+      
+      lblNickname.setBackground(new Background(
+         new BackgroundFill(
+            Color.rgb(66,66,66,0.6),
+            new CornerRadii(5),
+            null)));
+            
+      //lblNickname.setPadding(new Insets(5,5,5,5));
+            
+      lblNickname.setRotate(90);
+      
+      this.getChildren().addAll(imgStack, lblNickname);
       this.simulateDrag();
       this.toggleMask();
    }
    
    public Racer(String nickname, double startX, double startY, double startDeg) {
-      this.nickname = nickname;
-      this.racerImg = new Image(racerImage, racerWidth, racerHeight, true, true);
-      this.maskImg = new Image(racerMask, racerWidth, racerHeight, true, true);
-      
-      this.racerView = new ImageView(racerImg);
-      this.maskView = new ImageView(maskImg);
-      
-      this.getChildren().addAll(racerView, maskView);
-      this.simulateDrag();
-      this.toggleMask();
-      
+      this(nickname);
       this.positionX = startX;
       this.positionY = startY;
       this.rotation = startDeg;
@@ -109,6 +119,7 @@ public class Racer extends StackPane {
    public void hide() {
       this.racerView.setOpacity(0);
       this.maskView.setOpacity(0);
+      this.lblNickname.setVisible(false);
    }
    
    /* Movement */
@@ -370,5 +381,6 @@ public class Racer extends StackPane {
       this.setTranslateX(positionX);
       this.setTranslateY(positionY);
       this.setRotate(rotation);
+      this.lblNickname.setRotate(-rotation);
    }
 }

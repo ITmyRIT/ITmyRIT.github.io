@@ -18,7 +18,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import javafx.scene.text.Font;
-import java.awt.Color;
+import javafx.scene.paint.Color;
 
 /*
  * Final Project - Car Racer 
@@ -47,6 +47,7 @@ public class CarRacer extends Application {
    /* Map Constants */
    private static final String RACE_MAP = "assets/road.png";
    private static final String RACE_MASK = "assets/road-mask-green-red.png";
+   private static final String RACE_POSITION = "assets/road-mask-position.png";
    
    /* Player */
    private String nickname = "";
@@ -131,6 +132,10 @@ public class CarRacer extends Application {
          new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                nickname = tfNick.getText();
+               if (nickname.length()>8) {
+                  tfNick.setText(nickname.substring(0,8));
+                  return;
+               }
                updateScene(setupGame());
             }
          });
@@ -146,11 +151,11 @@ public class CarRacer extends Application {
    /* Create and return the MultiPlayer Race GUI */
    public Parent setupGame() {
        // Create new root pane
-      VBox root = new VBox(8);
+      StackPane root = new StackPane();
       
       
       // Initialize Race
-      race = new Race(RACE_MAP, RACE_MASK, sceneWidth, sceneHeight);
+      race = new Race(RACE_MAP, RACE_MASK, RACE_POSITION, sceneWidth, sceneHeight);
       
       // Initialize Racer
       Racer racer = new Racer(nickname, RACER_START_X, RACER_START_Y, RACER_START_DEG);
@@ -163,8 +168,16 @@ public class CarRacer extends Application {
       root.getChildren().add(race.getMap());
       //root.setAlignment(Pos.CENTER);
       
+      
+      Parent bpRace = finishScreen();
+      
+      race.setFinishPane(bpRace);
+      
+      root.getChildren().add(bpRace);
+      
       // Start race
       race.start();
+      
       
       // Return root
       return root;
@@ -177,6 +190,27 @@ public class CarRacer extends Application {
    
       root.setAlignment(Pos.CENTER);
       
+      // Return root
+      return root;
+   }
+   
+   /* Create and return the SinglePlayer Race GUI */
+   public Parent finishScreen() {
+      // Create new root pane
+      BorderPane root = new BorderPane();
+   
+      VBox message = new VBox(8);
+      message.setBackground(new Background(
+         new BackgroundFill(
+            Color.rgb(0,0,0,0.8),
+            new CornerRadii(5), 
+            null)));
+      message.setMaxWidth(sceneWidth/2);
+      message.setMaxHeight(sceneHeight/2);
+   
+      message.setPadding(new Insets(10,10,10,10));
+      
+      root.setCenter(message);
       // Return root
       return root;
    }

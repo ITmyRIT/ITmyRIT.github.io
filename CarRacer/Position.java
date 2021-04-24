@@ -8,6 +8,7 @@ public class Position implements Serializable{
    private double positionX = 0;
    private double positionY = 0;
    private double rotation = 0;
+   private int laps = -1;
    private String nickname = null;
    
    // Default Constructor
@@ -36,6 +37,7 @@ public class Position implements Serializable{
       this.positionY = pos.getPositionY();
       this.rotation = pos.getRotation();
       this.nickname = pos.getNickname();
+      this.laps = pos.getLaps();
    }
    
    
@@ -50,6 +52,10 @@ public class Position implements Serializable{
    
    public void setRotation(double rotation){
       this.rotation = rotation;
+   }
+   
+   public void setLaps(int laps) {
+      this.laps = laps;
    }
    
    
@@ -68,6 +74,10 @@ public class Position implements Serializable{
    
    public String getNickname() {
       return this.nickname;
+   }
+   
+   public int getLaps() {
+      return this.laps;
    }
    
    public String toString(){
