@@ -1,0 +1,1 @@
+javadoc --module-path F:\ISTE-121\javafx-sdk-11.0.2\lib --add-modules=javafx.controls "C:\Users\karlo\Documents\GitHub\ITmyRIT.github.io\CarRacer v1.04\javadocs" *.java

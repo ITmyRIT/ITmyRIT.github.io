@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<GameSettings>
+  <Socket>
+    <serverPort>1234</serverPort>
+    <serverIP>127.0.0.1</serverIP>
+  </Socket>
+  <Game>
+    <gameEndLap>3</gameEndLap>
+  </Game>
+</GameSettings>
